@@ -1,0 +1,63 @@
+version: "3.8"
+services:
+
+  # Second Redis Instance
+  redis2:
+    image: redis:alpine
+    container_name: redis2
+
+  # Second Database Postgres
+  db2:
+    image: postgres
+    volumes:
+      - ./data/db2:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    container_name: postgres_db2
+
+  # Second Django Application
+  app2:
+    build: .
+    volumes:
+      - .:/django2
+      - ./static_cdn2:/var/lib/static_cdn2
+    ports:
+      - 81:80
+    image: app2:django
+    container_name: django_app2
+    command: python manage.py runserver 0.0.0.0:80
+    depends_on:
+      - db2
+
+  # Second Celery Worker
+  celery2:
+    restart: always
+    build:
+      context: .
+    command: celery -A mysite2 worker -l DEBUG
+    volumes:
+      - .:/django2
+    container_name: celery2
+    depends_on:
+      - db2
+      - redis2
+      - app2
+
+  # Second Celery Beat
+  celery-beat2:
+    restart: always
+    build:
+      context: .
+    command: celery -A mysite2 beat -l DEBUG
+    volumes:
+      - .:/django2
+    container_name: celery_beat2
+    depends_on:
+      - db2
+      - redis2
+      - app2
+
+volumes:
+  static_cdn2:

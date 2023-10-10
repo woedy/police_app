@@ -6,6 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
 
+from dashboard.api.serializers import DashUpdatesSerializer, DirectorySerializer, DirectoryReviewSerializer, \
+    DashOverviewSerializer
+from directory.models import Directory, DirectoryReview
 from reports.models import Report, Officer, UploadReport, UploadReportTag, RecordReport, RecordReportTag, ReportImage
 
 User = get_user_model()
@@ -248,4 +251,67 @@ def record_report_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_reports_view_admin(request):
+    payload = {}
+    data = {}
+    user_data = {}
+
+    reports = Report.objects.all().order_by('-created_at')
+
+    reports_serializer = DashOverviewSerializer(reports, many=True)
+    if reports_serializer:
+        _reports = reports_serializer.data
+        data['reports'] = _reports
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def admin_approve_report_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    report_id = request.query_params.get('report_id', None)
+
+    if not report_id:
+        errors['report_id'] = ['Report id is required.']
+
+
+    report_detail = Report.objects.get(report_id=report_id)
+    report_detail.approved = True
+    report_detail.save()
+
+    report_serializer = DashOverviewSerializer(report_detail, many=False)
+    if report_serializer:
+        _report = report_serializer.data
+        data['report_detail'] = _report
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
 

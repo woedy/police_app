@@ -19,7 +19,7 @@ def get_user_dashboard(request):
     data = {}
     user_data = {}
 
-    reports = Report.objects.all()
+    reports = Report.objects.all().order_by('-created_at')
 
 
     #Overview

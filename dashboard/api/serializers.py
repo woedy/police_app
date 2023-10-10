@@ -23,6 +23,7 @@ class DashOverviewSerializer(serializers.ModelSerializer):
             'report_comments',
             'report_images',
             'report_videos',
+            'approved',
             'officers',
             'created_at',
 
@@ -42,6 +43,7 @@ class DashUpdatesSerializer(serializers.ModelSerializer):
             'report_id',
             'report_type',
             'reporter',
+            'approved',
             'created_at',
 
         ]
@@ -58,6 +60,8 @@ class DirectorySerializer(serializers.ModelSerializer):
             'name',
             'location_name',
             'photo',
+            'approved',
+
         ]
 
 
@@ -75,6 +79,7 @@ class DirectoryReviewSerializer(serializers.ModelSerializer):
             'title',
             'note',
             'average_rating',
+            'approved',
 
         ]
 

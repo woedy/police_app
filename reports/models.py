@@ -102,6 +102,9 @@ class Report(models.Model):
     shares = models.ManyToManyField(User, blank=True, related_name='report_shares')
     following = models.ManyToManyField(User, blank=True, related_name='report_followers')
 
+    approved = models.BooleanField(default=False)
+
+
 
     location_name = models.CharField(max_length=200, null=True, blank=True)
     lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
@@ -184,6 +187,8 @@ class UploadReport(models.Model):
     shares = models.ManyToManyField(User, blank=True, related_name='upload_report_shares')
 
 
+    approved = models.BooleanField(default=False)
+
     active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -236,6 +241,9 @@ class RecordReport(models.Model):
 
     shares = models.ManyToManyField(User, blank=True, related_name='record_report_shares')
 
+    approved = models.BooleanField(default=False)
+
+
     active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -282,6 +290,9 @@ class LiveReport(models.Model):
     lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
     reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='live_reporter')
+
+    approved = models.BooleanField(default=False)
+
 
     shares = models.ManyToManyField(User, blank=True, related_name='live_report_shares')
     watched = models.ManyToManyField(User, blank=True, related_name='live_watched_users')

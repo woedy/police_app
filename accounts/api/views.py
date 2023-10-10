@@ -4,9 +4,10 @@ from django.contrib.auth import get_user_model, authenticate
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from rest_framework import status, generics
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
@@ -373,6 +374,9 @@ def user_registration_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+
 def check_email_exist(email):
 
     qs = User.objects.filter(email=email)
@@ -827,4 +831,105 @@ def new_password_reset_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_new_user_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    email_errors = []
+    full_name_errors = []
+    password_errors = []
+    phone_errors = []
+
+    email = request.data.get('email', '').lower()
+    full_name = request.data.get('full_name', '')
+    phone = request.data.get('phone', '')
+
+
+    if not email:
+        email_errors.append('Email is required.')
+
+    if not is_valid_email(email):
+        email_errors.append('Valid email required.')
+
+    if check_email_exist(email):
+        email_errors.append('Email already exists in our database.')
+
+    if not full_name:
+        full_name_errors.append('Full name is required.')
+
+    if not phone:
+        phone_errors.append('Phone is required.')
+
+    if not is_valid_full_name(full_name):
+        full_name_errors.append('Full name must have more than 5 letters.')
+
+    if email_errors:
+        errors['email'] = email_errors
+
+    if full_name_errors:
+        errors['full_name'] = full_name_errors
+
+    if password_errors:
+        errors['password'] = password_errors
+
+    if email_errors or full_name_errors or password_errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    # If no errors, proceed with registration
+    # Your registration logic here
+
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        data["user_id"] = user.user_id
+        data["email"] = user.email
+        data["full_name"] = user.full_name
+        data["first_login"] = user.first_login
+
+        personal_info = PersonalInfo.objects.create(
+            user=user,
+            phone=phone
+        )
+        personal_info.save()
+
+    token = Token.objects.get(user=user).key
+    data['token'] = token
+
+
+
+    email_token = generate_email_token()
+
+    user = User.objects.get(email=email)
+    user.email_token = email_token
+    user.save()
+
+
+
+    new_activity = AllActivity.objects.create(
+        user=user,
+        subject="User Registration",
+        body=user.email + " Just created an account."
+    )
+    new_activity.save()
+
+
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
 

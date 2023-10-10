@@ -130,6 +130,121 @@ class UserLogin(APIView):
         return Response(payload, status=status.HTTP_200_OK)
 
 
+class AdminLogin(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        payload = {}
+        data = {}
+        errors = {}
+
+        email_errors = []
+        password_errors = []
+        fcm_token_errors = []
+
+        email = request.data.get('email', '').lower()
+        password = request.data.get('password', '')
+        fcm_token = request.data.get('fcm_token', '')
+
+        if not email:
+            email_errors.append('Email is required.')
+
+        if not password:
+            password_errors.append('Password is required.')
+
+        if not fcm_token:
+            fcm_token_errors.append('FCM device token is required.')
+
+        if email_errors:
+            errors['email'] = email_errors
+
+        if password_errors:
+            errors['password'] = password_errors
+
+        if fcm_token_errors:
+            errors['fcm_token'] = fcm_token_errors
+
+        if email_errors or password_errors or fcm_token_errors:
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        qs = User.objects.filter(email=email)
+        if qs.exists():
+            not_active = qs.filter(email_verified=False)
+            if not_active:
+                reconfirm_msg = "resend confirmation email."
+                msg1 = "Please check your email to confirm your account or " + reconfirm_msg.lower()
+                email_errors.append(msg1)
+
+            if not qs.first().admin:
+                email_errors.append('The user is not an admin')
+
+        if email_errors:
+            errors['email'] = email_errors
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        if not check_password(email, password):
+            password_errors.append('Invalid Credentials')
+
+        if password_errors:
+            errors['password'] = password_errors
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(email=email, password=password)
+        if not user:
+            email_errors.append('Invalid Credentials')
+
+        if email_errors:
+            errors['email'] = email_errors
+            payload['message'] = "Errors"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = Token.objects.get(user=user)
+        except Token.DoesNotExist:
+            token = Token.objects.create(user=user)
+
+        try:
+            user_personal_info = PersonalInfo.objects.get(user=user)
+        except PersonalInfo.DoesNotExist:
+            user_personal_info = PersonalInfo.objects.create(user=user)
+
+        user_personal_info.active = True
+        user_personal_info.save()
+
+        user.fcm_token = fcm_token
+        user.save()
+
+        data["user_id"] = user.user_id
+        data["email"] = user.email
+        data["full_name"] = user.full_name
+        data["token"] = token.key
+        data["first_login"] = user.first_login
+
+        payload['message'] = "Successful"
+        payload['data'] = data
+
+        new_activity = AllActivity.objects.create(
+            user=user,
+            subject="User Login",
+            body=user.email + " Just logged in."
+        )
+        new_activity.save()
+
+        if user.first_login is True:
+            user.first_login = False
+            user.save()
+
+        return Response(payload, status=status.HTTP_200_OK)
+
+
 def check_password(email, password):
     try:
         user = User.objects.get(email=email)

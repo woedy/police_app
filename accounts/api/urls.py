@@ -1,13 +1,15 @@
 from django.urls import path
 
 from accounts.api.views import UserLogin, user_registration_view, verify_user_email, PasswordResetView, \
-    confirm_otp_password_view, resend_email_verification, resend_password_otp, new_password_reset_view
+    confirm_otp_password_view, resend_email_verification, resend_password_otp, new_password_reset_view, AdminLogin
 
 app_name = 'accounts'
 
 urlpatterns = [
     # CLIENT URLS
     path('login-user/', UserLogin.as_view(), name="login_user"),
+    path('login-admin/', AdminLogin.as_view(), name="login_admin"),
+
     path('register-user/', user_registration_view, name="register_user"),
     path('verify-user-email/', verify_user_email, name="verify_user_email"),
     path('resend-email-verification/', resend_email_verification, name="resend_email_verification"),

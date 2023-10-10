@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from mysite.utils import base64_file
 from reports.api.serializers import ReportSerializer
 from reports.models import Report
+from user_profile.api.serializers import AllUsersSerializers
 from user_profile.models import PersonalInfo
 
 User = get_user_model()
@@ -102,6 +103,56 @@ def update_user_profile_view(request):
     data['email'] = user.email
     data['full_name'] = user.full_name
     data['photo'] = personal_info.photo.url
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_users_admin(request):
+    payload = {}
+    data = {}
+
+    all_users = User.objects.all()
+    all_users_serializer = AllUsersSerializers(all_users, many=True)
+    if all_users_serializer:
+        _all_users = all_users_serializer.data
+        data['all_users'] = _all_users
+
+
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_user_detail_admin(request):
+    payload = {}
+    data = {}
+
+    user_id = request.query_params.get('user_id', None)
+
+
+    user_details = User.objects.get(user_id=user_id)
+    user_details_serializer = AllUsersSerializers(user_details, many=False)
+    if user_details_serializer:
+        _user_details = user_details_serializer.data
+        data['user_details'] = _user_details
+
+
+
 
     payload['message'] = "Successful"
     payload['data'] = data

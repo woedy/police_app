@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-+hcpanw&cjywlad7w%)1bql4(cz&6e^df5jqe@qlo1j5hv^aad
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["143.42.21.193", "127.0.0.1", "0.0.0.0"]
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'box.teamalfy.co.uk'
@@ -83,13 +83,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "mysite.urls"
 
-
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://143.42.21.193:80"
-]
 
 
 
@@ -226,4 +219,9 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = []
 

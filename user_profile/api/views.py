@@ -5,7 +5,7 @@ from rest_framework.decorators import permission_classes, api_view, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from mysite.utils import base64_file
+from police_app_pro.utils import base64_file
 from reports.api.serializers import ReportSerializer
 from reports.models import Report
 from user_profile.api.serializers import AllUsersSerializers
@@ -119,7 +119,7 @@ def get_all_users_admin(request):
     payload = {}
     data = {}
 
-    all_users = User.objects.all()
+    all_users = User.objects.all().filter(is_deleted=False)
     all_users_serializer = AllUsersSerializers(all_users, many=True)
     if all_users_serializer:
         _all_users = all_users_serializer.data

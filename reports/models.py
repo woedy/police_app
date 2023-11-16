@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import pre_save
 
-from mysite.utils import unique_report_id_generator, unique_upload_report_id_generator, \
+from police_app_pro.utils import unique_report_id_generator, unique_upload_report_id_generator, \
     unique_record_report_id_generator
 
 User = get_user_model()

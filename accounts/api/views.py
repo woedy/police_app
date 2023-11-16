@@ -14,7 +14,7 @@ from django.conf import settings
 
 from accounts.api.serializers import UserRegistrationSerializer, PasswordResetSerializer
 from all_activities.models import AllActivity
-from mysite.utils import generate_email_token, generate_random_otp_code
+from police_app_pro.utils import generate_email_token, generate_random_otp_code
 from user_profile.models import PersonalInfo
 
 User = get_user_model()
@@ -931,5 +931,121 @@ def add_new_user_view(request):
 
     return Response(payload, status=status.HTTP_200_OK)
 
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def admin_delete_user(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+
+    user_id = request.data.get('user_id', '')
+
+    if not user_id:
+        errors['user_id'] = ['User id is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(user_id=user_id)
+    except User.DoesNotExist:
+        errors['user_id'] = ['User does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+    user.is_deleted = True
+    user.save()
+
+    #new_activity = AllActivity.objects.create(
+    #    user=user,
+    #    subject="User Registration",
+    #    body=user.email + " Just created an account."
+    #)
+    #new_activity.save()
+
+
+
+
+    payload['message'] = "User deleted Successfully."
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def admin_new_password_reset_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+    user_id_errors = []
+    password_errors = []
+
+    user_id = request.data.get('user_id', '0').lower()
+    new_password = request.data.get('new_password')
+    new_password2 = request.data.get('new_password2')
+
+
+
+    if not user_id:
+        user_id_errors.append('User id is required.')
+        if user_id_errors:
+            errors['email'] = user_id_errors
+            payload['message'] = "Error"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+    qs = User.objects.filter(user_id=user_id)
+    if not qs.exists():
+        user_id_errors.append('User does not exists.')
+        if user_id_errors:
+            errors['user_id'] = user_id_errors
+            payload['message'] = "Error"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+
+    if not new_password:
+        password_errors.append('Password required.')
+        if password_errors:
+            errors['password'] = password_errors
+            payload['message'] = "Error"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+
+    if new_password != new_password2:
+        password_errors.append('Password don\'t match.')
+        if password_errors:
+            errors['password'] = password_errors
+            payload['message'] = "Error"
+            payload['errors'] = errors
+            return Response(payload, status=status.HTTP_404_NOT_FOUND)
+
+    user = User.objects.filter(user_id=user_id).first()
+    user.set_password(new_password)
+    user.save()
+
+    data['email'] = user.email
+    data['user_id'] = user.user_id
+
+
+    payload['message'] = "Successful, Password reset successfully."
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
 
 

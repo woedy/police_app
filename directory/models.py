@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
-from mysite.utils import unique_directory_id_generator
+from police_app_pro.utils import unique_directory_id_generator
 from user_profile.models import get_default_profile_image
 
 # Create your models here.

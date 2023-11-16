@@ -6,7 +6,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-from mysite.utils import unique_user_id_generator
+from police_app_pro.utils import unique_user_id_generator
 
 
 class UserManager(BaseUserManager):
@@ -78,6 +78,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
 
     first_login = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
 
     staff = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)

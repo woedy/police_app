@@ -6,9 +6,9 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 
 import chat
-from mysite import routing
+from police_app_pro import routing
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "police_app_pro.settings")
 
 django_asgi_app = get_asgi_application()
 

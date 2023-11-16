@@ -7,7 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from communications.api.consumers.serializers import PrivateRoomChatMessageSerializer
 from communications.models import PrivateChatRoom, PrivateRoomChatMessage
-from mysite.exceptions import ClientError
+from police_app_pro.exceptions import ClientError
 
 User = get_user_model()
 class AdminChatConsumers(AsyncJsonWebsocketConsumer):

@@ -59,6 +59,11 @@ class UserManager(BaseUserManager):
         return qs
 
 
+USER_TYPE_CHOICES = (
+    ("Admin", "Admin"),
+    ("User", "User"),
+    ("Police", "Police"),
+)
 
 # Create your models here.
 class User(AbstractBaseUser):
@@ -67,6 +72,7 @@ class User(AbstractBaseUser):
     full_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
+    role = models.CharField(default='User', choices=USER_TYPE_CHOICES, max_length=255)
 
     fcm_token = models.TextField(blank=True, null=True)
 
@@ -78,7 +84,6 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
 
     first_login = models.BooleanField(default=True)
-    is_deleted = models.BooleanField(default=False)
 
     staff = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
@@ -126,4 +131,3 @@ def pre_save_user_id_receiver(sender, instance, *args, **kwargs):
         instance.user_id = unique_user_id_generator(instance)
 
 pre_save.connect(pre_save_user_id_receiver, sender=User)
-

@@ -111,6 +111,37 @@ def add_report_view(request):
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
+def delete_report_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    report_id = request.data.get('report_id', '')
+
+
+    if not report_id:
+        errors['report_id'] = ['Report id is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    report = Report.objects.get(report_id=report_id)
+    report.is_deleted = True
+    report.save()
+
+    payload['message'] = "Report deleted Successfully"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
 def upload_report_view(request):
     payload = {}
     data = {}
@@ -175,6 +206,32 @@ def upload_report_view(request):
     data['upload_report_id'] = new_upload_report.upload_report_id
 
     payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def delete_upload_report_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    upload_report_id = request.data.get('upload_report_id', '')
+
+    if not upload_report_id:
+        errors['upload_report_id'] = ['Upload Report id is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    report = UploadReport.objects.get(upload_report_id=upload_report_id)
+    report.is_deleted = True
+    report.save()
+
+    payload['message'] = "Upload Report deleted Successfully"
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
@@ -252,6 +309,33 @@ def record_report_view(request):
 
     return Response(payload, status=status.HTTP_200_OK)
 
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def delete_record_report_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    record_report_id = request.data.get('record_report_id', '')
+
+    if not record_report_id:
+        errors['record_report_id'] = ['Record Report id is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    report = RecordReport.objects.get(record_report_id=record_report_id)
+    report.is_deleted = True
+    report.save()
+
+    payload['message'] = "Record Report deleted Successfully"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET', ])
@@ -262,7 +346,7 @@ def get_all_reports_view_admin(request):
     data = {}
     user_data = {}
 
-    reports = Report.objects.all().order_by('-created_at')
+    reports = Report.objects.all().filter(is_deleted=False).order_by('-created_at')
 
     reports_serializer = DashOverviewSerializer(reports, many=True)
     if reports_serializer:

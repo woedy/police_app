@@ -47,6 +47,7 @@ class PersonalInfo(models.Model):
     dob = models.DateTimeField(null=True, blank=True)
     marital_status = models.BooleanField(default=False, null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
     about_me = models.TextField(blank=True, null=True)
 
     followers = models.ManyToManyField(User, blank=True, related_name="user_followers")
@@ -82,5 +83,3 @@ def post_save_user_room(sender, instance, *args, **kwargs):
         )
 
 post_save.connect(post_save_user_room, sender=PersonalInfo)
-
-

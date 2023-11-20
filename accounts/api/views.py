@@ -852,6 +852,10 @@ def add_new_user_view(request):
     email = request.data.get('email', '').lower()
     full_name = request.data.get('full_name', '')
     phone = request.data.get('phone', '')
+    country = request.data.get('country', '')
+    dob = request.data.get('dob', '')
+    photo = request.data.get('photo', '')
+    role = request.data.get('role', '')
 
 
     if not email:
@@ -890,18 +894,28 @@ def add_new_user_view(request):
     # Your registration logic here
 
     serializer = UserRegistrationSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
-        data["user_id"] = user.user_id
-        data["email"] = user.email
-        data["full_name"] = user.full_name
-        data["first_login"] = user.first_login
 
-        personal_info = PersonalInfo.objects.create(
-            user=user,
-            phone=phone
-        )
-        personal_info.save()
+    user = User.objects.create(
+        email=email,
+        full_name=full_name,
+        role=role,
+    )
+
+
+    personal_info = PersonalInfo.objects.create(
+        user=user,
+        phone=phone,
+        photo=photo,
+        country=country,
+        dob=dob
+    )
+    personal_info.save()
+
+    data['user_id'] = user.user_id
+    data['email'] = user.email
+    data['full_name'] = user.full_name
+    data['role'] = user.role
+
 
     token = Token.objects.get(user=user).key
     data['token'] = token
@@ -930,8 +944,6 @@ def add_new_user_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
-
-
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])

@@ -114,6 +114,8 @@ class Report(models.Model):
 
 
     active = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -190,6 +192,8 @@ class UploadReport(models.Model):
     approved = models.BooleanField(default=False)
 
     active = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -245,6 +249,8 @@ class RecordReport(models.Model):
 
 
     active = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

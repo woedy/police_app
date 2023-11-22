@@ -14,6 +14,7 @@ class UserPersonalInfoSerializers(serializers.ModelSerializer):
         fields = [
             'photo',
             'phone',
+            "language",
 
 
         ]
@@ -27,7 +28,9 @@ class AllUsersSerializers(serializers.ModelSerializer):
             'user_id',
             'email',
             'full_name',
-            'personal_info'
+            'personal_info',
+            'role',
+            "is_active"
 
         ]
 

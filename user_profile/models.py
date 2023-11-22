@@ -48,6 +48,7 @@ class PersonalInfo(models.Model):
     marital_status = models.BooleanField(default=False, null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
+    language = models.CharField(default="English", max_length=255, null=True, blank=True)
     about_me = models.TextField(blank=True, null=True)
 
     followers = models.ManyToManyField(User, blank=True, related_name="user_followers")

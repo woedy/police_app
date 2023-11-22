@@ -87,6 +87,7 @@ class User(AbstractBaseUser):
 
     staff = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
 
     timestamp = models.DateTimeField(auto_now_add=True)
 

@@ -15,7 +15,8 @@ class ReportOfficerSerializer(serializers.ModelSerializer):
         model = Officer
         fields = [
             "id",
-            "name"
+            "name",
+            "image"
         ]
 
 

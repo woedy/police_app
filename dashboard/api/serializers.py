@@ -3,15 +3,28 @@ from rest_framework import serializers
 
 from directory.models import Directory, DirectoryReview
 from reports.api.serializers import ReporterSerializer
-from reports.models import Report
+from reports.models import Report, Officer
 from user_profile.models import PersonalInfo
 
 User = get_user_model()
+
+class ReportOfficerSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Officer
+        fields = [
+            "id",
+            "name"
+        ]
 
 
 
 
 class DashOverviewSerializer(serializers.ModelSerializer):
+    officers = ReportOfficerSerializer(many=True)
+    reporter = ReporterSerializer(many=False)
+
 
 
     class Meta:
@@ -26,6 +39,8 @@ class DashOverviewSerializer(serializers.ModelSerializer):
             'approved',
             'officers',
             'created_at',
+
+            'reporter'
 
 
         ]

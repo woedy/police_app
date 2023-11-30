@@ -31,7 +31,6 @@ class AllUsersSerializers(serializers.ModelSerializer):
             'personal_info',
             'role',
             "is_active"
-
         ]
 
 

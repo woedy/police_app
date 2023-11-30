@@ -20,6 +20,7 @@ class ReporterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'user_id',
             'email',
             'full_name',
             'personal_info'

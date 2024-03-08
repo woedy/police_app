@@ -3,10 +3,24 @@ from rest_framework import serializers
 
 from directory.models import Directory, DirectoryReview
 from reports.api.serializers import ReporterSerializer
-from reports.models import Report, Officer
+from reports.models import Report, Officer, ReportImage, ReportVideo
 from user_profile.models import PersonalInfo
 
 User = get_user_model()
+
+
+
+class ReportImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportImage
+        fields = ["image"]
+
+
+class ReportVideosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportVideo
+        fields = ["video"]
+
 
 class ReportOfficerSerializer(serializers.ModelSerializer):
 
@@ -24,6 +38,8 @@ class ReportOfficerSerializer(serializers.ModelSerializer):
 
 class DashOverviewSerializer(serializers.ModelSerializer):
     officers = ReportOfficerSerializer(many=True)
+    report_images = ReportImagesSerializer(many=True)
+    report_videos = ReportVideosSerializer(many=True)
     reporter = ReporterSerializer(many=False)
 
 
@@ -76,7 +92,6 @@ class DirectorySerializer(serializers.ModelSerializer):
             'name',
             'location_name',
             'photo',
-            'approved',
 
         ]
 
@@ -95,7 +110,6 @@ class DirectoryReviewSerializer(serializers.ModelSerializer):
             'title',
             'note',
             'average_rating',
-            'approved',
 
         ]
 

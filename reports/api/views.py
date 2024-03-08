@@ -9,7 +9,9 @@ from rest_framework.response import Response
 from dashboard.api.serializers import DashUpdatesSerializer, DirectorySerializer, DirectoryReviewSerializer, \
     DashOverviewSerializer
 from directory.models import Directory, DirectoryReview
-from reports.models import Report, Officer, UploadReport, UploadReportTag, RecordReport, RecordReportTag, ReportImage
+from reports.api.serializers import LiveReportSerializer
+from reports.models import Report, Officer, UploadReport, UploadReportTag, RecordReport, RecordReportTag, ReportImage, \
+    ReportVideo, LiveReport, LiveReportComment
 
 User = get_user_model()
 
@@ -25,8 +27,8 @@ def add_report_view(request):
     report_type = request.data.get('report_type', '')
 
 
-    images = request.FILES.getlist('images')
-    # videos = request.data.get('videos', '')
+    images = request.data.get('images', [])
+    videos = request.data.get('videos', [])
 
     officers = request.data.get('officers', '')
     location_name = request.data.get('location_name', '')
@@ -82,10 +84,19 @@ def add_report_view(request):
 
     )
 
+    print(images)
+
     for image in images:
         image = ReportImage.objects.create(
             report=new_report,
             image=image
+        )
+        # print(image)
+
+    for video in videos:
+        video = ReportVideo.objects.create(
+            report=new_report,
+            video=video
         )
         # print(image)
 
@@ -184,7 +195,7 @@ def upload_report_view(request):
     the_reporter = User.objects.get(user_id=reporter)
 
     new_upload_report = UploadReport.objects.create(
-        #image=base64_file(image),
+        image=image,
         caption=caption,
         location_name=location_name,
         reporter=the_reporter
@@ -209,6 +220,8 @@ def upload_report_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
@@ -247,7 +260,6 @@ def record_report_view(request):
     errors = {}
 
 
-    #image = request.data.get('image', '')
     video = request.data.get('video', '')
 
     caption = request.data.get('caption', '')
@@ -283,7 +295,7 @@ def record_report_view(request):
     the_reporter = User.objects.get(user_id=reporter)
 
     new_record_report = RecordReport.objects.create(
-        #video=base64_file(video),
+        video=video,
         caption=caption,
         location_name=location_name,
         reporter=the_reporter
@@ -308,6 +320,11 @@ def record_report_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
@@ -398,4 +415,100 @@ def admin_approve_report_view(request):
     return Response(payload, status=status.HTTP_200_OK)
 
 
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def save_live_report_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    video = request.data.get('video', '')
+    caption = request.data.get('caption', '')
+    location_name = request.data.get('location_name', '')
+    lat = request.data.get('lat', '')
+    lng = request.data.get('lng', '')
+    reporter_id = request.data.get('reporter', '')
+
+    if not caption:
+        errors['caption'] = ['Caption is required.']
+
+    if not video:
+        errors['video'] = ['Video required.']
+
+    if not reporter_id:
+        errors['reporter'] = ['Reporter is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        the_reporter = User.objects.get(user_id=reporter_id)
+    except User.DoesNotExist:
+        errors['reporter'] = ['Reporter does not exist.']
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    new_live_report = LiveReport.objects.create(
+        video=video,
+        caption=caption,
+        location_name=location_name,
+        lat=lat,
+        lng=lng,
+        reporter=the_reporter
+    )
+
+    # Add Watchers
+    for watched_user_id in request.data.get('watched', []):
+        try:
+            watched_user = User.objects.get(user_id=watched_user_id)
+            new_live_report.watched.add(watched_user)
+        except User.DoesNotExist:
+            pass
+
+    for comment_data in request.data.get('comments', []):
+        try:
+            commenter = User.objects.get(user_id=comment_data['user'])
+            new_comment = LiveReportComment.objects.create(
+                live_report=new_live_report,
+                comment=comment_data['comment'],
+                user=commenter
+            )
+        except User.DoesNotExist:
+            pass
+
+    data['live_report_id'] = new_live_report.live_report_id
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_live_reports(request):
+    payload = {}
+    data = {}
+    user_data = {}
+
+    live_reports = LiveReport.objects.all().filter(is_deleted=False).order_by('-created_at')
+
+    live_reports_serializer = LiveReportSerializer(live_reports, many=True)
+    if live_reports_serializer:
+        _live_reports = live_reports_serializer.data
+        data['live_reports'] = _live_reports
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
 

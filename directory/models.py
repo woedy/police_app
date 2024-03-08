@@ -42,6 +42,7 @@ class Directory(models.Model):
     lat = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
     lng = models.DecimalField(max_digits=30, decimal_places=15, null=True, blank=True)
 
+    is_deleted = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -65,6 +66,7 @@ pre_save.connect(pre_save_directory_id_receiver, sender=Directory)
 
 class DirectoryReview(models.Model):
     directory = models.ForeignKey(Directory, on_delete=models.CASCADE, related_name="directory_reviews")
+    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="directory_reviewer")
 
     title = models.CharField(max_length=1000, null=True, blank=True)
     note = models.TextField(null=True, blank=True)

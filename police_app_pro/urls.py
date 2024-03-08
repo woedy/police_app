@@ -30,6 +30,7 @@ path('chat/', include('chat.urls')),
     path('api/dashboard/', include('dashboard.api.urls', 'dashboard_api')),
     path('api/reports/', include('reports.api.urls', 'reports_api')),
     path('api/communications/', include('communications.api.urls', 'communications_api')),
+    path('api/directory/', include('directory.api.urls', 'directory_api')),
 
 ]
 if settings.DEBUG:

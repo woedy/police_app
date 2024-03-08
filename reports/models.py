@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 
 from police_app_pro.utils import unique_report_id_generator, unique_upload_report_id_generator, \
-    unique_record_report_id_generator
+    unique_record_report_id_generator, unique_live_report_id_generator
 
 User = get_user_model()
 
@@ -315,10 +315,17 @@ class LiveReport(models.Model):
     watched = models.ManyToManyField(User, blank=True, related_name='live_watched_users')
     watch_count = models.IntegerField(default=0, null=True, blank=True)
 
+    is_deleted = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+def pre_save_live_report_id_receiver(sender, instance, *args, **kwargs):
+    if not instance.live_report_id:
+        instance.live_report_id = unique_live_report_id_generator(instance)
+
+pre_save.connect(pre_save_live_report_id_receiver, sender=LiveReport)
 
 
 

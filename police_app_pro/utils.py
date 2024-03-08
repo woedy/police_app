@@ -82,6 +82,21 @@ def unique_record_report_id_generator(instance):
         return
     return record_report_id
 
+
+
+def unique_live_report_id_generator(instance):
+    """
+    This is for a django project with a live_report_id field
+    """
+    size = 9
+    live_report_id = random_string_generator(size=size)
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(live_report_id=live_report_id).exists()
+    if qs_exists:
+        return
+    return live_report_id
+
 def unique_directory_id_generator(instance):
     """
     This is for a django project with a report_id field

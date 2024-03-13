@@ -27,8 +27,8 @@ def add_report_view(request):
     report_type = request.data.get('report_type', '')
 
 
-    images = request.data.get('images', [])
-    videos = request.data.get('videos', [])
+    images = request.FILES.getlist('images', [])
+    videos = request.FILES.getlist('videos', [])
 
     officers = request.data.get('officers', '')
     location_name = request.data.get('location_name', '')
@@ -539,10 +539,7 @@ def save_live_report_view(request):
     call_id = request.data.get('call_id', '')
     video_url = request.data.get('video_url', '')
     video = request.data.get('video', '')
-    caption = request.data.get('caption', '')
-    location_name = request.data.get('location_name', '')
-    lat = request.data.get('lat', '')
-    lng = request.data.get('lng', '')
+
     reporter_id = request.data.get('reporter', '')
 
 
@@ -567,31 +564,10 @@ def save_live_report_view(request):
         call_id=call_id,
         video_url=video_url,
         video=video,
-        caption=caption,
-        location_name=location_name,
-        lat=lat,
-        lng=lng,
         reporter=the_reporter
     )
 
-    # Add Watchers
-    for watched_user_id in request.data.get('watched', []):
-        try:
-            watched_user = User.objects.get(user_id=watched_user_id)
-            new_live_report.watched.add(watched_user)
-        except User.DoesNotExist:
-            pass
 
-    for comment_data in request.data.get('comments', []):
-        try:
-            commenter = User.objects.get(user_id=comment_data['user'])
-            new_comment = LiveReportComment.objects.create(
-                live_report=new_live_report,
-                comment=comment_data['comment'],
-                user=commenter
-            )
-        except User.DoesNotExist:
-            pass
 
     data['live_report_id'] = new_live_report.live_report_id
 

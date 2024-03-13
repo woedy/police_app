@@ -113,6 +113,7 @@ class UserLogin(APIView):
         data["full_name"] = user.full_name
         data["token"] = token.key
         data["first_login"] = user.first_login
+        data["room_id"] = user_personal_info.room.id
 
         payload['message'] = "Successful"
         payload['data'] = data
@@ -228,6 +229,7 @@ class AdminLogin(APIView):
         data["full_name"] = user.full_name
         data["token"] = token.key
         data["first_login"] = user.first_login
+        data["room_id"] = user_personal_info.room.id
 
         payload['message'] = "Successful"
         payload['data'] = data

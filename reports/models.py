@@ -275,11 +275,6 @@ pre_save.connect(pre_save_record_report_id_receiver, sender=RecordReport)
 
 
 
-class RecordReportTag(models.Model):
-    record_report = models.ForeignKey(RecordReport, on_delete=models.CASCADE, related_name="record_report_tags")
-    tag = models.CharField(max_length=1000, null=True, blank=True)
-    x_position = models.DecimalField(default=0.0, max_digits=30, decimal_places=15, null=True, blank=True)
-    y_position = models.DecimalField(default=0.0, max_digits=30, decimal_places=15, null=True, blank=True)
 
 
 class RecordReportComment(models.Model):
@@ -298,6 +293,10 @@ class RecordReportComment(models.Model):
 ####################
 class LiveReport(models.Model):
     live_report_id = models.CharField(max_length=120, unique=True, blank=True, null=True)
+    stream_id = models.CharField(max_length=120, unique=True, blank=True, null=True)
+    call_id = models.CharField(max_length=120, unique=True, blank=True, null=True)
+    video_url = models.CharField(max_length=120, unique=True, blank=True, null=True)
+
     video = models.FileField(upload_to=upload_live_report_video_path, null=True, blank=True)
 
     caption = models.TextField(null=True, blank=True)

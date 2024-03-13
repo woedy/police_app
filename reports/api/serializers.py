@@ -62,6 +62,9 @@ class LiveReportSerializer(serializers.ModelSerializer):
         model = LiveReport
         fields = [
             'live_report_id',
+            'stream_id',
+            'call_id',
+            'video_url',
             'video',
             'caption',
             'location_name',

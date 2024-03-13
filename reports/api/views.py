@@ -10,7 +10,7 @@ from dashboard.api.serializers import DashUpdatesSerializer, DirectorySerializer
     DashOverviewSerializer
 from directory.models import Directory, DirectoryReview
 from reports.api.serializers import LiveReportSerializer
-from reports.models import Report, Officer, UploadReport, UploadReportTag, RecordReport, RecordReportTag, ReportImage, \
+from reports.models import Report, Officer, UploadReport, UploadReportTag, RecordReport, ReportImage, \
     ReportVideo, LiveReport, LiveReportComment
 
 User = get_user_model()
@@ -20,6 +20,128 @@ User = get_user_model()
 @permission_classes([IsAuthenticated, ])
 @authentication_classes([TokenAuthentication, ])
 def add_report_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    report_type = request.data.get('report_type', '')
+
+
+    images = request.data.get('images', [])
+    videos = request.data.get('videos', [])
+
+    officers = request.data.get('officers', '')
+    location_name = request.data.get('location_name', '')
+    note = request.data.get('note', '')
+    user_contact_info = request.data.get('user_contact_info', '')
+    contact_info = request.data.get('contact_info', '')
+    make_private = request.data.get('make_private', '')
+    make_collaborative = request.data.get('make_collaborative', '')
+    reporter = request.data.get('reporter', '')
+
+    if not report_type:
+        errors['report_type'] = ['Report Type is required.']
+
+    if not officers:
+        errors['officers'] = ['Officers are required.']
+
+    if not location_name:
+        errors['location_name'] = ['Location required.']
+
+    if not note:
+        errors['note'] = ['Note is required.']
+
+    if not reporter:
+        errors['reporter'] = ['Reporter is required.']
+
+
+    if not user_contact_info:
+        errors['user_contact_info'] = ['User contact start is required.']
+
+    if not make_private:
+        errors['make_private'] = ['Make private is required.']
+
+    if not make_collaborative:
+        errors['make_collaborative'] = ['Make collaborative is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+    the_reporter = User.objects.get(user_id=reporter)
+
+    new_report = Report.objects.create(
+        report_type=report_type,
+        note=note,
+        contact_info=contact_info,
+        location_name=location_name,
+        reporter=the_reporter
+
+    )
+
+
+    if user_contact_info == "true":
+        new_report.user_contact_info = True
+        new_report.save()
+    elif user_contact_info == "false":
+        new_report.user_contact_info = False
+        new_report.save()
+
+    if make_private == "true":
+        new_report.make_private = True
+        new_report.save()
+    elif make_private == "false":
+        new_report.make_private = False
+        new_report.save()
+
+    if make_collaborative == "true":
+        new_report.make_collaborative = True
+        new_report.save()
+    elif make_collaborative == "false":
+        new_report.make_collaborative = False
+        new_report.save()
+
+    print(images)
+
+    for image in images:
+        image = ReportImage.objects.create(
+            report=new_report,
+            image=image
+        )
+        # print(image)
+
+    for video in videos:
+        video = ReportVideo.objects.create(
+            report=new_report,
+            video=video
+        )
+        # print(image)
+
+
+    for officer in officers:
+
+        print(officer)
+        officer = Officer.objects.create(
+            report=new_report,
+            name=officer
+        )
+
+
+
+    data['report_id'] = new_report.report_id
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_report_view22222(request):
     payload = {}
     data = {}
     errors = {}
@@ -266,7 +388,6 @@ def record_report_view(request):
     location_name = request.data.get('location_name', '')
     reporter = request.data.get('reporter', '')
 
-    tags = request.data.get('tags', '')
 
 
     if not caption:
@@ -301,17 +422,6 @@ def record_report_view(request):
         reporter=the_reporter
 
     )
-
-
-    for tag in tags:
-        new_tag = RecordReportTag.objects.create(
-            record_report=new_record_report,
-            tag=tag['tag'],
-            x_position=tag['x_position'],
-            y_position=tag['y_position']
-        )
-
-
 
 
     data['record_report_id'] = new_record_report.record_report_id
@@ -425,6 +535,9 @@ def save_live_report_view(request):
     data = {}
     errors = {}
 
+    stream_id = request.data.get('stream_id', '')
+    call_id = request.data.get('call_id', '')
+    video_url = request.data.get('video_url', '')
     video = request.data.get('video', '')
     caption = request.data.get('caption', '')
     location_name = request.data.get('location_name', '')
@@ -432,11 +545,6 @@ def save_live_report_view(request):
     lng = request.data.get('lng', '')
     reporter_id = request.data.get('reporter', '')
 
-    if not caption:
-        errors['caption'] = ['Caption is required.']
-
-    if not video:
-        errors['video'] = ['Video required.']
 
     if not reporter_id:
         errors['reporter'] = ['Reporter is required.']
@@ -455,6 +563,9 @@ def save_live_report_view(request):
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
     new_live_report = LiveReport.objects.create(
+        stream_id=stream_id,
+        call_id=call_id,
+        video_url=video_url,
         video=video,
         caption=caption,
         location_name=location_name,

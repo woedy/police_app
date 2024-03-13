@@ -29,6 +29,7 @@ def get_user_profile_view(request):
     user_data['user_id'] = user.user_id
     user_data['email'] = user.email
     user_data['full_name'] = user.full_name
+    user_data['room_id'] = personal_info.room.id
 
     user_data['photo'] = personal_info.photo.url
 

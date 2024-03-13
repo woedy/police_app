@@ -50,6 +50,8 @@ class PrivateChatRoom(models.Model):
         return f"PrivateChatRoom-{self.id}"
 
 
+
+
 class RoomChatMessageManager(models.Manager):
     def by_room(self, room):
         qs = PrivateRoomChatMessage.objects.filter(room=room).order_by("-timestamp")

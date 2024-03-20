@@ -1,63 +1,69 @@
 version: "3.8"
 services:
 
-  # Second Redis Instance
-  redis2:
+  # Redis
+  api-policeapp-redis_c:
     image: redis:alpine
-    container_name: redis2
+    container_name: api-policeapp-redis_c
 
-  # Second Database Postgres
-  db2:
+  # Database Postgres
+  api-policeapp-db:
     image: postgres
     volumes:
-      - ./data/db2:/var/lib/postgresql/data
+      - ./data/db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    container_name: postgres_db2
+      - POSTGRES_DB=police_app_pro
+      - POSTGRES_USER=police_app_pro
+      - POSTGRES_PASSWORD=police_app_pro
+    container_name: api-policeapp-db
 
-  # Second Django Application
-  app2:
+  # Django Application
+  api-policeapp-app3:
     build: .
     volumes:
-      - .:/django2
-      - ./static_cdn2:/var/lib/static_cdn2
+      - .:/django3
+      - ./static_cdn:/var/lib/static_cdn
     ports:
-      - 81:80
-    image: app2:django
-    container_name: django_app2
-    command: python manage.py runserver 0.0.0.0:80
+      - "8282:8282"
+    image: app3:django
+    container_name: api-policeapp-app3
+    command: python manage.py runserver 0.0.0.0:8282
     depends_on:
-      - db2
+      - api-policeapp-db
 
-  # Second Celery Worker
-  celery2:
+  # Celery Worker
+  celery:
     restart: always
     build:
       context: .
-    command: celery -A mysite2 worker -l DEBUG
+    command: celery -A police_app_pro worker -l DEBUG
     volumes:
-      - .:/django2
-    container_name: celery2
+      - .:/django3
+    container_name: api-policeapp-celery_c
     depends_on:
-      - db2
-      - redis2
-      - app2
+      - api-policeapp-db
+      - api-policeapp-redis_c
+      - api-policeapp-app3
 
-  # Second Celery Beat
-  celery-beat2:
+  # Celery Beat
+  celery-beat:
     restart: always
     build:
       context: .
-    command: celery -A mysite2 beat -l DEBUG
+    command: celery -A police_app_pro beat -l DEBUG
     volumes:
-      - .:/django2
-    container_name: celery_beat2
+      - .:/django3
+    container_name: api-policeapp-celery_beat_c
     depends_on:
-      - db2
-      - redis2
-      - app2
+      - api-policeapp-db
+      - api-policeapp-redis_c
+      - api-policeapp-app3
 
 volumes:
-  static_cdn2:
+  static_cdn:
+
+# networks:
+#   default:
+#     external: true
+#     name: docker-nginx-proxy-manager
+#

@@ -1,13 +1,21 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from communications.models import PrivateChatRoom
 from user_profile.models import PersonalInfo
 
 User = get_user_model()
 
+class PrivateChatRoomSerializers(serializers.ModelSerializer):
 
+
+    class Meta:
+        model = PrivateChatRoom
+        fields = [
+            'room_id',
+        ]
 class UserPersonalInfoSerializers(serializers.ModelSerializer):
-
+    room = PrivateChatRoomSerializers(many=False)
 
     class Meta:
         model = PersonalInfo
@@ -15,6 +23,7 @@ class UserPersonalInfoSerializers(serializers.ModelSerializer):
             'photo',
             'phone',
             "language",
+            'room'
 
 
         ]

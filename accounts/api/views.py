@@ -14,6 +14,7 @@ from django.conf import settings
 
 from accounts.api.serializers import UserRegistrationSerializer, PasswordResetSerializer
 from all_activities.models import AllActivity
+from communications.models import PrivateChatRoom
 from police_app_pro.utils import generate_email_token, generate_random_otp_code
 from user_profile.models import PersonalInfo
 
@@ -113,7 +114,7 @@ class UserLogin(APIView):
         data["full_name"] = user.full_name
         data["token"] = token.key
         data["first_login"] = user.first_login
-        data["room_id"] = user_personal_info.room.id
+        data["room_id"] = user_personal_info.room.room_id
 
         payload['message'] = "Successful"
         payload['data'] = data
@@ -229,7 +230,7 @@ class AdminLogin(APIView):
         data["full_name"] = user.full_name
         data["token"] = token.key
         data["first_login"] = user.first_login
-        data["room_id"] = user_personal_info.room.id
+        data["room_id"] = user_personal_info.room.room_id
 
         payload['message'] = "Successful"
         payload['data'] = data
@@ -328,6 +329,7 @@ def user_registration_view(request):
             user=user
         )
         personal_info.save()
+
 
     token = Token.objects.get(user=user).key
     data['token'] = token

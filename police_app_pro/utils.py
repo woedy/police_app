@@ -83,6 +83,22 @@ def unique_record_report_id_generator(instance):
     return record_report_id
 
 
+def unique_room_id_generator(instance):
+    """
+    This is for a room_id field
+    :param instance:
+    :return:
+    """
+    size = random.randint(30, 45)
+    room_id = random_string_generator(size=size)
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(room_id=room_id).exists()
+    if qs_exists:
+        return None
+    return room_id
+
+
 
 def unique_live_report_id_generator(instance):
     """

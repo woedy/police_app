@@ -30,7 +30,7 @@ def add_report_view(request):
     images = request.FILES.getlist('images', [])
     videos = request.FILES.getlist('videos', [])
 
-    officers = request.data.get('officers', '')
+    officers = request.data.get('officers', [])
     location_name = request.data.get('location_name', '')
     note = request.data.get('note', '')
     user_contact_info = request.data.get('user_contact_info', '')
@@ -64,13 +64,18 @@ def add_report_view(request):
     if not make_collaborative:
         errors['make_collaborative'] = ['Make collaborative is required.']
 
+
+    try:
+        the_reporter = User.objects.get(user_id=reporter)
+    except:
+        errors['reporter'] = ['Reporter does not exist.']
+
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
 
-    the_reporter = User.objects.get(user_id=reporter)
 
     new_report = Report.objects.create(
         report_type=report_type,

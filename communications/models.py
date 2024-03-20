@@ -4,7 +4,9 @@ import random
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models.signals import pre_save
 
+from police_app_pro.utils import unique_room_id_generator
 
 User = get_user_model()
 def get_filename_ext(filepath):
@@ -24,9 +26,10 @@ def upload_message_image_path(instance, filename):
 
 
 class PrivateChatRoom(models.Model):
-    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='chat_user1', null=True,
+    room_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    admin = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='chat_admin', null=True,
                               blank=True)
-    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='chat_user2', null=True,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='chat_user', null=True,
                               blank=True)
 
     connected_users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="connected_users")
@@ -48,6 +51,12 @@ class PrivateChatRoom(models.Model):
     @property
     def group_name(self):
         return f"PrivateChatRoom-{self.id}"
+
+def pre_save_room_id_receiver(sender, instance, *args, **kwargs):
+    if not instance.room_id:
+        instance.room_id = unique_room_id_generator(instance)
+
+pre_save.connect(pre_save_room_id_receiver, sender=PrivateChatRoom)
 
 
 

@@ -80,7 +80,7 @@ post_save.connect(post_save_personal_info, sender=PersonalInfo)
 def post_save_user_room(sender, instance, *args, **kwargs):
     if not instance.room:
         instance.room = PrivateChatRoom.objects.create(
-            user1=instance.user
+            user=instance.user
         )
 
 post_save.connect(post_save_user_room, sender=PersonalInfo)

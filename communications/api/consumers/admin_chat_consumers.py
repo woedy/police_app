@@ -1,8 +1,10 @@
 import json
-
 from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.contrib.auth import get_user_model
+
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
+
+
 from django.contrib.auth.models import AnonymousUser
 
 from communications.api.consumers.serializers import PrivateRoomChatMessageSerializer
@@ -10,6 +12,7 @@ from communications.models import PrivateChatRoom, PrivateRoomChatMessage
 from police_app_pro.exceptions import ClientError
 
 User = get_user_model()
+
 class AdminChatConsumers(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
@@ -24,37 +27,19 @@ class AdminChatConsumers(AsyncJsonWebsocketConsumer):
         print("AdminChatConsumers: receive_json")
         command = content.get("command", None)
         user_id = content.get("user_id", None)
-        room = content.get("room", None)
+        room_id = content.get("room_id", None)
         message = content.get("message", None)
         images = content.get("images", None)
         page_number = content.get("page_number", None)
 
         try:
             if command == "join":
-                print("CONTENT: Command: " + str(command))
-                print("CONTENT: User ID: " + str(user_id))
-                print("CONTENT: ROOM ID: " + str(room))
-                print("CONTENT: PAGE NUMBER: " + str(room))
 
                 self.user = await get_user(user_id)
-
-                print(self.user.email)
-
-                await self.join_room(room, user_id, page_number)
+                await self.join_room(room_id, user_id, page_number)
 
             elif command == "send":
-                print("CONTENT: Command: " + str(command))
-                print("CONTENT: User ID: " + str(user_id))
-                print("CONTENT: ROOM ID: " + str(room))
-                print("CONTENT: MESSAGE: " + str(message))
-
-                await self.send_room(content["room"], content["user_id"], content["message"], content["images"])
-                # raise ClientError(422,"You can't send an empty message.")
-
-
-
-
-
+                await self.send_room(content["room_id"], content["user_id"], content["message"], content["images"])
 
         except ClientError as e:
             await self.handle_client_error(e)
@@ -103,23 +88,16 @@ class AdminChatConsumers(AsyncJsonWebsocketConsumer):
 
 
         ## Store that we're in the room
-        self.room_id = room.id
-        payload = await get_room_chat_messages(room, page_number)
+        self.room_id = room.room_id
+        payload = await get_room_chat_messages(room)
 
         payload = json.loads(payload)
-        #new_page_number = await get_new_page_number(room, page_number)
-        #num_connected_users = await get_num_connected_users(room_id)
 
-
-        # await self.send_messages_payload(payload)
-        # Instruct their client to finish opening the room
         await self.channel_layer.group_send(
             room.group_name,
             {
                 "type": "send_messages_payload",
                 "messages": payload,
-                #"connected_user_count": num_connected_users,
-                #"new_page_number": new_page_number
             }
         )
 
@@ -140,12 +118,10 @@ class AdminChatConsumers(AsyncJsonWebsocketConsumer):
                 self.channel_name
             )
 
-            # self.room_id = room.id
             message_data = await create_public_room_chat_message(room_id, user_id, message, images)
 
             if message_data != None:
                 payload = json.loads(message_data)
-                # await self.send_messages_payload(payload)
 
                 await self.channel_layer.group_send(
                     room.group_name,
@@ -182,31 +158,34 @@ class AdminChatConsumers(AsyncJsonWebsocketConsumer):
         )
 
 
+
 @database_sync_to_async
 def get_room_or_error(room_id):
     """
 	Tries to fetch a room for the user
 	"""
     try:
-        room = PrivateChatRoom.objects.get(pk=room_id)
+        room = PrivateChatRoom.objects.get(room_id=room_id)
     except PrivateChatRoom.DoesNotExist:
         raise ClientError("ROOM_INVALID", "Invalid room.")
     return room
 
 
+
 @database_sync_to_async
 def connect_user(room_id, user_id):
     try:
-        message_room = PrivateChatRoom.objects.get(id=room_id)
+        message_room = PrivateChatRoom.objects.get(room_id=room_id)
         if message_room != None:
             message_room.connect_user(user_id)
             count = len(message_room.connected_users.all())
             print(count)
 
-        # return json.dumps(team_count)
 
     except PrivateChatRoom.DoesNotExist:
         raise ClientError("OBJECT_INVALID", "Invalid object.")
+
+
 
 
 
@@ -214,48 +193,40 @@ def connect_user(room_id, user_id):
 def get_room_chat_messages(room):
     try:
         qs = PrivateRoomChatMessage.objects.by_room(room).order_by('-timestamp')[:20]
-
-
         serializers = PrivateRoomChatMessageSerializer(qs, many=True)
         if serializers:
             data = serializers.data
-
             return json.dumps(data)
-
     except PrivateRoomChatMessage.DoesNotExist:
         raise ClientError("OBJECT_INVALID", "Invalid object.")
 
 
+
 @database_sync_to_async
 def create_public_room_chat_message(room_id, user_id, message, files):
-
-    user_obj = User.objects.get(user_id=user_id)
-
-    room_obj = PrivateChatRoom.objects.get(id=room_id)
-
-    message = PrivateRoomChatMessage.objects.create(
-        user=user_obj,
-        room=room_obj,
-        message=message
-    )
-    message.save()
-
-    #if files != None:
-    #    for file in files:
-    #        file_file = base64_file(file['file'], file['file_name'], file['file_ext'])
-    #        new_file = File.objects.create(name=file['file_name'], file=file_file, user=user_obj)
-    #        message.files.add(new_file)
-    #        message.save()
-
     try:
-        qs = PrivateRoomChatMessage.objects.by_room(room_id).order_by('-timestamp')
-        qs.order_by('id')
-       # p = Paginator(qs, 20)
+        user_obj = User.objects.get(user_id=user_id)
+        room_obj = PrivateChatRoom.objects.get(room_id=room_id)
 
+        message = PrivateRoomChatMessage.objects.create(
+            user=user_obj,
+            room=room_obj,
+            message=message
+        )
+        message.save()
+
+        # Fetch the messages for the room
+        qs = PrivateRoomChatMessage.objects.by_room(room_obj).order_by('-timestamp')[:20]
         serializers = PrivateRoomChatMessageSerializer(qs, many=True)
         if serializers:
             data = serializers.data
             return json.dumps(data)
+
+    except PrivateChatRoom.DoesNotExist:
+        raise ClientError("ROOM_INVALID", "Invalid room.")
+
+    except User.DoesNotExist:
+        raise ClientError("USER_INVALID", "Invalid user.")
 
     except PrivateRoomChatMessage.DoesNotExist:
         raise ClientError("OBJECT_INVALID", "Invalid object.")

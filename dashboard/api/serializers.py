@@ -9,7 +9,6 @@ from user_profile.models import PersonalInfo
 User = get_user_model()
 
 
-
 class ReportImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportImage
@@ -23,8 +22,6 @@ class ReportVideosSerializer(serializers.ModelSerializer):
 
 
 class ReportOfficerSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Officer
         fields = [
@@ -34,15 +31,11 @@ class ReportOfficerSerializer(serializers.ModelSerializer):
         ]
 
 
-
-
 class DashOverviewSerializer(serializers.ModelSerializer):
     officers = ReportOfficerSerializer(many=True)
     report_images = ReportImagesSerializer(many=True)
     report_videos = ReportVideosSerializer(many=True)
     reporter = ReporterSerializer(many=False)
-
-
 
     class Meta:
         model = Report
@@ -57,17 +50,17 @@ class DashOverviewSerializer(serializers.ModelSerializer):
             'officers',
             'created_at',
 
-            'reporter'
+            'reporter',
 
+            'location_name',
+            'lat',
+            'lng',
 
         ]
 
 
-
-
 class DashUpdatesSerializer(serializers.ModelSerializer):
     reporter = ReporterSerializer(many=False)
-
 
     class Meta:
         model = Report
@@ -78,10 +71,11 @@ class DashUpdatesSerializer(serializers.ModelSerializer):
             'approved',
             'created_at',
 
+            'location_name',
+            'lat',
+            'lng',
+
         ]
-
-
-
 
 
 class DirectorySerializer(serializers.ModelSerializer):
@@ -96,12 +90,8 @@ class DirectorySerializer(serializers.ModelSerializer):
         ]
 
 
-
-
-
 class DirectoryReviewSerializer(serializers.ModelSerializer):
     directory = DirectorySerializer(many=False)
-
 
     class Meta:
         model = DirectoryReview
@@ -112,4 +102,3 @@ class DirectoryReviewSerializer(serializers.ModelSerializer):
             'average_rating',
 
         ]
-

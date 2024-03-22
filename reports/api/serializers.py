@@ -41,6 +41,10 @@ class ReportSerializer(serializers.ModelSerializer):
             'officers',
             'created_at',
 
+            'location_name',
+            'lat',
+            'lng',
+
 
         ]
 

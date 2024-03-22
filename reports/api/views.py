@@ -26,6 +26,210 @@ def add_report_view(request):
 
     report_type = request.data.get('report_type', '')
 
+    location_name = request.data.get('location_name', '')
+    note = request.data.get('note', '')
+    user_contact_info = request.data.get('user_contact_info', '')
+    contact_info = request.data.get('contact_info', '')
+    make_private = request.data.get('make_private', '')
+    make_collaborative = request.data.get('make_collaborative', '')
+    reporter = request.data.get('reporter', '')
+
+    if not report_type:
+        errors['report_type'] = ['Report Type is required.']
+
+
+    if not location_name:
+        errors['location_name'] = ['Location required.']
+
+    if not note:
+        errors['note'] = ['Note is required.']
+
+    if not reporter:
+        errors['reporter'] = ['Reporter is required.']
+
+
+    if not user_contact_info:
+        errors['user_contact_info'] = ['User contact start is required.']
+
+    if not make_private:
+        errors['make_private'] = ['Make private is required.']
+
+    if not make_collaborative:
+        errors['make_collaborative'] = ['Make collaborative is required.']
+
+
+    try:
+        the_reporter = User.objects.get(user_id=reporter)
+    except:
+        errors['reporter'] = ['Reporter does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    new_report = Report.objects.create(
+        report_type=report_type,
+        note=note,
+        contact_info=contact_info,
+        location_name=location_name,
+        reporter=the_reporter
+
+    )
+
+
+    if user_contact_info == "true":
+        new_report.user_contact_info = True
+        new_report.save()
+    elif user_contact_info == "false":
+        new_report.user_contact_info = False
+        new_report.save()
+
+    if make_private == "true":
+        new_report.make_private = True
+        new_report.save()
+    elif make_private == "false":
+        new_report.make_private = False
+        new_report.save()
+
+    if make_collaborative == "true":
+        new_report.make_collaborative = True
+        new_report.save()
+    elif make_collaborative == "false":
+        new_report.make_collaborative = False
+        new_report.save()
+
+
+    data['report_id'] = new_report.report_id
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_report_officer_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    report_id = request.data.get('report_id', '')
+    officer = request.data.get('officer', '')
+
+    if not officer:
+        errors['officer'] = ['Officer is required.']
+
+    try:
+        report = Report.objects.get(report_id=report_id)
+    except:
+        errors['report_id'] = ['Report does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    officer = Officer.objects.create(
+        report=report,
+        name=officer
+    )
+
+    data['report_id'] = report.report_id
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_report_image_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    report_id = request.data.get('report_id', '')
+    image = request.data.get('image', '')
+
+    if not image:
+        errors['image'] = ['Image is required.']
+
+    try:
+        report = Report.objects.get(report_id=report_id)
+    except:
+        errors['report_id'] = ['Report does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    image = ReportImage.objects.create(
+        report=report,
+        image=image
+    )
+
+    data['report_id'] = report.report_id
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_report_video_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    report_id = request.data.get('report_id', '')
+    video = request.data.get('video', '')
+
+    if not video:
+        errors['video'] = ['Video is required.']
+
+    try:
+        report = Report.objects.get(report_id=report_id)
+    except:
+        errors['report_id'] = ['Report does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    image = ReportVideo.objects.create(
+        report=report,
+        video=video
+    )
+
+    data['report_id'] = report.report_id
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def add_report_view_previous(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    report_type = request.data.get('report_type', '')
+
 
     images = request.FILES.getlist('images', [])
     videos = request.FILES.getlist('videos', [])
@@ -141,7 +345,6 @@ def add_report_view(request):
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
-
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])

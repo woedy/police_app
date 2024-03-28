@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from reports.models import Report, LiveReport, LiveReportComment
+from reports.models import Report, LiveReport, LiveReportComment, ReportImage, ReportVideo
 from user_profile.models import PersonalInfo
 
 User = get_user_model()
@@ -26,8 +26,27 @@ class ReporterSerializer(serializers.ModelSerializer):
             'personal_info'
         ]
 
-class ReportSerializer(serializers.ModelSerializer):
+class ReporterImagesSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = ReportImage
+        fields = [
+            'image',
+
+        ]
+
+class ReporterVideosSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ReportVideo
+        fields = [
+            'video'
+        ]
+
+
+class ReportSerializer(serializers.ModelSerializer):
+    report_images = ReporterImagesSerializer(many=True)
+    report_videos = ReporterVideosSerializer(many=True)
 
     class Meta:
         model = Report

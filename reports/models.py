@@ -179,6 +179,9 @@ class Officer(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name="officers")
     name = models.CharField(max_length=1000, null=True, blank=True)
     image = models.ImageField(upload_to=upload_officer_image_path, null=True, blank=True)
+    police_station_location = models.CharField(max_length=1000, null=True, blank=True)
+    badge_id = models.CharField(max_length=1000, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
 
 #######################

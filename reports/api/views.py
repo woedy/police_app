@@ -120,9 +120,17 @@ def add_report_officer_view(request):
 
     report_id = request.data.get('report_id', '')
     officer = request.data.get('officer', '')
+    image = request.data.get('image', '')
+    police_station_location = request.data.get('police_station_location', '')
+    badge_id = request.data.get('badge_id', '')
+    notes = request.data.get('notes', '')
 
     if not officer:
         errors['officer'] = ['Officer is required.']
+
+    if not officer:
+        errors['officer'] = ['Officer is required.']
+
 
     try:
         report = Report.objects.get(report_id=report_id)
@@ -136,7 +144,11 @@ def add_report_officer_view(request):
 
     officer = Officer.objects.create(
         report=report,
-        name=officer
+        name=officer,
+        image=image,
+        police_station_location=police_station_location,
+        badge_id=badge_id,
+        notes=notes,
     )
 
     data['report_id'] = report.report_id

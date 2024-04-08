@@ -298,7 +298,7 @@ class LiveReport(models.Model):
     live_report_id = models.CharField(max_length=120, unique=True, blank=True, null=True)
     stream_id = models.CharField(max_length=120, unique=True, blank=True, null=True)
     call_id = models.CharField(max_length=120, unique=True, blank=True, null=True)
-    video_url = models.CharField(max_length=120, unique=True, blank=True, null=True)
+    video_url = models.TextField(blank=True, null=True)
 
     video = models.FileField(upload_to=upload_live_report_video_path, null=True, blank=True)
 

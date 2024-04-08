@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from dashboard.api.serializers import DashUpdatesSerializer, DirectorySerializer, DirectoryReviewSerializer, \
     DashOverviewSerializer
 from directory.models import Directory, DirectoryReview
-from reports.api.serializers import LiveReportSerializer
+from reports.api.serializers import LiveReportSerializer, OfficerSerializer
 from reports.models import Report, Officer, UploadReport, UploadReportTag, RecordReport, ReportImage, \
     ReportVideo, LiveReport, LiveReportComment
 
@@ -592,6 +592,33 @@ def delete_upload_report_view(request):
     return Response(payload, status=status.HTTP_200_OK)
 
 
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def delete_officer_view(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    id = request.data.get('id', '')
+
+    if not id:
+        errors['id'] = ['ID is required.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    officer = Officer.objects.get(id=id)
+    officer.delete()
+
+    payload['message'] = "Deleted Successfully"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
@@ -699,6 +726,31 @@ def get_all_reports_view_admin(request):
     if reports_serializer:
         _reports = reports_serializer.data
         data['reports'] = _reports
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([TokenAuthentication, ])
+def get_all_officers_view_admin(request):
+    payload = {}
+    data = {}
+    user_data = {}
+
+    officers = Officer.objects.all().order_by('-id')
+
+    officers_serializer = OfficerSerializer(officers, many=True)
+    if officers_serializer:
+        _officers = officers_serializer.data
+        data['officers'] = _officers
 
 
     payload['message'] = "Successful"

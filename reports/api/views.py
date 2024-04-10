@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes, api_view, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from dashboard.api.serializers import DashUpdatesSerializer, DirectorySerializer, DirectoryReviewSerializer, \
     DashOverviewSerializer
@@ -18,7 +18,7 @@ User = get_user_model()
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_report_view(request):
     payload = {}
     data = {}
@@ -112,7 +112,7 @@ def add_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_report_officer_view(request):
     payload = {}
     data = {}
@@ -160,7 +160,7 @@ def add_report_officer_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_report_image_view(request):
     payload = {}
     data = {}
@@ -197,7 +197,7 @@ def add_report_image_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_report_video_view(request):
     payload = {}
     data = {}
@@ -234,7 +234,7 @@ def add_report_video_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_report_view_previous(request):
     payload = {}
     data = {}
@@ -360,7 +360,7 @@ def add_report_view_previous(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_report_view22222(request):
     payload = {}
     data = {}
@@ -463,7 +463,7 @@ def add_report_view22222(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def delete_report_view(request):
     payload = {}
     data = {}
@@ -494,7 +494,7 @@ def delete_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def upload_report_view(request):
     payload = {}
     data = {}
@@ -566,7 +566,7 @@ def upload_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def delete_upload_report_view(request):
     payload = {}
     data = {}
@@ -594,7 +594,7 @@ def delete_upload_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def delete_officer_view(request):
     payload = {}
     data = {}
@@ -622,7 +622,7 @@ def delete_officer_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def record_report_view(request):
     payload = {}
     data = {}
@@ -685,7 +685,7 @@ def record_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def delete_record_report_view(request):
     payload = {}
     data = {}
@@ -714,7 +714,7 @@ def delete_record_report_view(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def get_all_reports_view_admin(request):
     payload = {}
     data = {}
@@ -739,7 +739,7 @@ def get_all_reports_view_admin(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def get_all_officers_view_admin(request):
     payload = {}
     data = {}
@@ -764,7 +764,7 @@ def get_all_officers_view_admin(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def admin_approve_report_view(request):
     payload = {}
     data = {}
@@ -801,7 +801,7 @@ def admin_approve_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def save_live_report_view(request):
     payload = {}
     data = {}
@@ -852,7 +852,7 @@ def save_live_report_view(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def get_all_live_reports(request):
     payload = {}
     data = {}

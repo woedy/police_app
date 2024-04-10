@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes, api_view, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from dashboard.api.serializers import DirectorySerializer
 from directory.models import Directory, DirectoryReview
@@ -14,7 +14,7 @@ User = get_user_model()
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_directory_view(request):
     payload = {}
     data = {}
@@ -72,7 +72,7 @@ def add_directory_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def delete_directory_view(request):
     payload = {}
     data = {}
@@ -103,7 +103,7 @@ def delete_directory_view(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def get_all_directories_view(request):
     payload = {}
     data = {}
@@ -126,7 +126,7 @@ def get_all_directories_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def review_directory_view(request):
     payload = {}
     data = {}

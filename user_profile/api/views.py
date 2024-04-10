@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes, api_view, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from police_app_pro.utils import base64_file
 from reports.api.serializers import ReportSerializer
@@ -15,7 +15,7 @@ User = get_user_model()
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def get_user_profile_view(request):
     payload = {}
     data = {}
@@ -58,7 +58,7 @@ def get_user_profile_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def update_user_profile_view(request):
     payload = {}
     data = {}
@@ -115,7 +115,7 @@ def update_user_profile_view(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def get_all_users_admin(request):
     payload = {}
     data = {}
@@ -138,7 +138,7 @@ def get_all_users_admin(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def get_user_detail_admin(request):
     payload = {}
     data = {}

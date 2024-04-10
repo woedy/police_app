@@ -4,13 +4,14 @@ from django.contrib.auth import get_user_model, authenticate
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from rest_framework import status, generics
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.api.serializers import UserRegistrationSerializer, PasswordResetSerializer
 from all_activities.models import AllActivity
@@ -93,10 +94,11 @@ class UserLogin(APIView):
             payload['errors'] = errors
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            token = Token.objects.get(user=user)
-        except Token.DoesNotExist:
-            token = Token.objects.create(user=user)
+        refresh = RefreshToken.for_user(user)
+        token = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
 
         try:
             user_personal_info = PersonalInfo.objects.get(user=user)
@@ -112,7 +114,7 @@ class UserLogin(APIView):
         data["user_id"] = user.user_id
         data["email"] = user.email
         data["full_name"] = user.full_name
-        data["token"] = token.key
+        data["token"] = token
         data["first_login"] = user.first_login
         data["room_id"] = user_personal_info.room.room_id
 
@@ -314,12 +316,17 @@ def user_registration_view(request):
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    # If no errors, proceed with registration
-    # Your registration logic here
-
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
+
+        # Generate a token for the user
+        refresh = RefreshToken.for_user(user)
+        token = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
         data["user_id"] = user.user_id
         data["email"] = user.email
         data["full_name"] = user.full_name
@@ -330,55 +337,46 @@ def user_registration_view(request):
         )
         personal_info.save()
 
+        data['token'] = token
 
-    token = Token.objects.get(user=user).key
-    data['token'] = token
+        email_token = generate_email_token()
 
+        user.email_token = email_token
+        user.save()
 
+        context = {
+            'email_token': email_token,
+            'email': user.email,
+            'full_name': user.full_name
+        }
 
-    email_token = generate_email_token()
+        txt_ = get_template("registration/emails/verify.txt").render(context)
+        html_ = get_template("registration/emails/verify.html").render(context)
 
-    user = User.objects.get(email=email)
-    user.email_token = email_token
-    user.save()
+        subject = 'EMAIL CONFIRMATION CODE'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [user.email]
 
-    context = {
-        'email_token': email_token,
-        'email': user.email,
-        'full_name': user.full_name
-    }
+        sent_mail = send_mail(
+            subject,
+            txt_,
+            from_email,
+            recipient_list,
+            html_message=html_,
+            fail_silently=False
+        )
 
-    txt_ = get_template("registration/emails/verify.txt").render(context)
-    html_ = get_template("registration/emails/verify.html").render(context)
-
-    subject = 'EMAIL CONFIRMATION CODE'
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = [user.email]
-
-    sent_mail = send_mail(
-        subject,
-        txt_,
-        from_email,
-        recipient_list,
-        html_message=html_,
-        fail_silently=False
-    )
-
-    new_activity = AllActivity.objects.create(
-        user=user,
-        subject="User Registration",
-        body=user.email + " Just created an account."
-    )
-    new_activity.save()
-
-
-
+        new_activity = AllActivity.objects.create(
+            user=user,
+            subject="User Registration",
+            body=user.email + " Just created an account."
+        )
+        new_activity.save()
 
     payload['message'] = "Successful"
     payload['data'] = data
 
     return Response(payload, status=status.HTTP_200_OK)
-
 
 
 def check_email_exist(email):
@@ -842,7 +840,7 @@ def new_password_reset_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def add_new_user_view(request):
     payload = {}
     data = {}
@@ -951,7 +949,7 @@ def add_new_user_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def admin_delete_user(request):
     payload = {}
     data = {}
@@ -1002,7 +1000,7 @@ def admin_delete_user(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([TokenAuthentication, ])
+@authentication_classes([JWTAuthentication, ])
 def admin_new_password_reset_view(request):
     payload = {}
     data = {}

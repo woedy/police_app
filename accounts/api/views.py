@@ -211,10 +211,11 @@ class AdminLogin(APIView):
             payload['errors'] = errors
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            token = Token.objects.get(user=user)
-        except Token.DoesNotExist:
-            token = Token.objects.create(user=user)
+        refresh = RefreshToken.for_user(user)
+        token = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
 
         try:
             user_personal_info = PersonalInfo.objects.get(user=user)
@@ -230,7 +231,7 @@ class AdminLogin(APIView):
         data["user_id"] = user.user_id
         data["email"] = user.email
         data["full_name"] = user.full_name
-        data["token"] = token.key
+        data["token"] = token
         data["first_login"] = user.first_login
         data["room_id"] = user_personal_info.room.room_id
 

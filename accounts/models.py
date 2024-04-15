@@ -47,6 +47,9 @@ class UserManager(BaseUserManager):
             is_staff=True,
             is_admin=True
         )
+        user.role = "Admin"
+        user.email_verified = True
+        user.save()
         return user
 
     def search(self, query=None):

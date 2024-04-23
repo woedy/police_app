@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -111,24 +112,24 @@ WSGI_APPLICATION = "police_app_pro.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'police_app_pro',
-        'USER': 'police_app_pro',
-        'PASSWORD': 'police_app_pro',
-        'HOST': 'api-policeapp-db',
-        'PORT': 5432,
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'police_app_pro',
+#         'USER': 'police_app_pro',
+#         'PASSWORD': 'police_app_pro',
+#         'HOST': 'api-policeapp-db',
+#         'PORT': 5432,
+#     }
+# }
 
 
 #CELERY_BROKER_URL = "redis://redis:6379"
@@ -250,4 +251,10 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # Add other authentication classes as needed
     ),
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }

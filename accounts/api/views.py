@@ -94,10 +94,13 @@ class UserLogin(APIView):
             payload['errors'] = errors
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-        refresh = RefreshToken.for_user(user)
+        # Generate token using the custom serializer
+        serializer = CustomTokenObtainPairSerializer()
+        _token = serializer.get_token(user)
+
         token = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'refresh': str(_token),
+            'access': str(_token.access_token),
         }
 
         try:
@@ -211,10 +214,13 @@ class AdminLogin(APIView):
             payload['errors'] = errors
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-        refresh = RefreshToken.for_user(user)
+        # Generate token using the custom serializer
+        serializer = CustomTokenObtainPairSerializer()
+        _token = serializer.get_token(user)
+
         token = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'refresh': str(_token),
+            'access': str(_token.access_token),
         }
 
         try:
@@ -321,11 +327,13 @@ def user_registration_view(request):
     if serializer.is_valid():
         user = serializer.save()
 
-        # Generate a token for the user
-        refresh = RefreshToken.for_user(user)
+        # Generate token using the custom serializer
+        serializer = CustomTokenObtainPairSerializer()
+        _token = serializer.get_token(user)
+
         token = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'refresh': str(_token),
+            'access': str(_token.access_token),
         }
 
         data["user_id"] = user.user_id
@@ -919,8 +927,15 @@ def add_new_user_view(request):
     data['full_name'] = user.full_name
     data['role'] = user.role
 
+    # Generate token using the custom serializer
+    serializer = CustomTokenObtainPairSerializer()
+    _token = serializer.get_token(user)
 
-    token = Token.objects.get(user=user).key
+    token = {
+        'refresh': str(_token),
+        'access': str(_token.access_token),
+    }
+
     data['token'] = token
 
 

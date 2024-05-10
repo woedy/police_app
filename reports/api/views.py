@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from accounts.api.custom_jwt import CustomJWTAuthentication
 from dashboard.api.serializers import DashUpdatesSerializer, DirectorySerializer, DirectoryReviewSerializer, \
     DashOverviewSerializer
 from directory.models import Directory, DirectoryReview
@@ -18,7 +18,7 @@ User = get_user_model()
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def add_report_view(request):
     payload = {}
     data = {}
@@ -112,7 +112,7 @@ def add_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def add_report_officer_view(request):
     payload = {}
     data = {}
@@ -160,7 +160,7 @@ def add_report_officer_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def add_report_image_view(request):
     payload = {}
     data = {}
@@ -197,7 +197,7 @@ def add_report_image_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def add_report_video_view(request):
     payload = {}
     data = {}
@@ -234,7 +234,7 @@ def add_report_video_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def add_report_view_previous(request):
     payload = {}
     data = {}
@@ -360,7 +360,7 @@ def add_report_view_previous(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def add_report_view22222(request):
     payload = {}
     data = {}
@@ -463,7 +463,7 @@ def add_report_view22222(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def delete_report_view(request):
     payload = {}
     data = {}
@@ -494,7 +494,7 @@ def delete_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def upload_report_view(request):
     payload = {}
     data = {}
@@ -566,7 +566,7 @@ def upload_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def delete_upload_report_view(request):
     payload = {}
     data = {}
@@ -594,7 +594,7 @@ def delete_upload_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def delete_officer_view(request):
     payload = {}
     data = {}
@@ -605,12 +605,16 @@ def delete_officer_view(request):
     if not id:
         errors['id'] = ['ID is required.']
 
+    try:
+        officer = Officer.objects.get(id=id)
+    except:
+        errors['id'] = ['officer does not exist.']
+
     if errors:
         payload['message'] = "Errors"
         payload['errors'] = errors
         return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
-    officer = Officer.objects.get(id=id)
     officer.delete()
 
     payload['message'] = "Deleted Successfully"
@@ -622,7 +626,49 @@ def delete_officer_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
+def get_officer_reports(request):
+    payload = {}
+    data = {}
+    errors = {}
+
+    id = request.data.get('id', '')
+
+    if not id:
+        errors['id'] = ['ID is required.']
+
+
+    try:
+        officer = Officer.objects.get(id=id)
+    except:
+        errors['id'] = ['officer does not exist.']
+
+    if errors:
+        payload['message'] = "Errors"
+        payload['errors'] = errors
+        return Response(payload, status=status.HTTP_400_BAD_REQUEST)
+
+    reports = Report.objects.filter(officers=officer)
+
+
+    reports_serializer = DashOverviewSerializer(reports, many=True)
+    if reports_serializer:
+        _reports = reports_serializer.data
+        data['reports'] = _reports
+
+
+
+
+    payload['message'] = "Successful"
+    payload['data'] = data
+
+    return Response(payload, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def record_report_view(request):
     payload = {}
     data = {}
@@ -685,7 +731,7 @@ def record_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def delete_record_report_view(request):
     payload = {}
     data = {}
@@ -714,7 +760,7 @@ def delete_record_report_view(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def get_all_reports_view_admin(request):
     payload = {}
     data = {}
@@ -739,7 +785,7 @@ def get_all_reports_view_admin(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def get_all_officers_view_admin(request):
     payload = {}
     data = {}
@@ -764,7 +810,7 @@ def get_all_officers_view_admin(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def admin_approve_report_view(request):
     payload = {}
     data = {}
@@ -801,7 +847,7 @@ def admin_approve_report_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def save_live_report_view(request):
     payload = {}
     data = {}
@@ -852,7 +898,7 @@ def save_live_report_view(request):
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def get_all_live_reports(request):
     payload = {}
     data = {}

@@ -4,14 +4,14 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from accounts.api.custom_jwt import CustomJWTAuthentication
 from communications.models import EmailMessage
 
 User = get_user_model()
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def send_email_message(request):
     payload = {}
     data = {}

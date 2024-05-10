@@ -10,9 +10,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from accounts.api.custom_jwt import CustomJWTAuthentication, create_refresh_token, create_access_token
 from accounts.api.serializers import UserRegistrationSerializer, PasswordResetSerializer
 from all_activities.models import AllActivity
 from communications.models import PrivateChatRoom
@@ -94,13 +94,15 @@ class UserLogin(APIView):
             payload['errors'] = errors
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
+
+
         # Generate token using the custom serializer
-        serializer = CustomTokenObtainPairSerializer()
-        _token = serializer.get_token(user)
+        access_token = create_access_token(user.user_id)
+        refresh_token = create_refresh_token(user.user_id)
 
         token = {
-            'refresh': str(_token),
-            'access': str(_token.access_token),
+            'refresh': str(refresh_token),
+            'access': str(access_token),
         }
 
         try:
@@ -484,10 +486,7 @@ def verify_user_email(request):
     except PersonalInfo.DoesNotExist:
         user_personal_info = PersonalInfo.objects.create(user=user)
 
-    try:
-        token = Token.objects.get(user=user)
-    except Token.DoesNotExist:
-        token = Token.objects.create(user=user)
+
 
     user.is_active = True
     user.email_verified = True
@@ -496,7 +495,6 @@ def verify_user_email(request):
     data["user_id"] = user.user_id
     data["email"] = user.email
     data["full_name"] = user.full_name
-    data["token"] = token.key
 
     payload['message'] = "Successful"
     payload['data'] = data
@@ -849,7 +847,7 @@ def new_password_reset_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def add_new_user_view(request):
     payload = {}
     data = {}
@@ -965,7 +963,7 @@ def add_new_user_view(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def admin_delete_user(request):
     payload = {}
     data = {}
@@ -1016,7 +1014,7 @@ def admin_delete_user(request):
 
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
 def admin_new_password_reset_view(request):
     payload = {}
     data = {}

@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from accounts.api.custom_jwt import CustomJWTAuthentication
 from dashboard.api.serializers import DashOverviewSerializer, DashUpdatesSerializer, DirectorySerializer, \
     DirectoryReviewSerializer
 from directory.models import Directory, DirectoryReview
@@ -13,7 +14,9 @@ from reports.models import Report
 
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, ])
-@authentication_classes([JWTAuthentication, ])
+#@authentication_classes([JWTAuthentication, ])
+@authentication_classes([CustomJWTAuthentication, ])
+
 def get_user_dashboard(request):
     payload = {}
     data = {}
